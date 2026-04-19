@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Güvenli IP Sorgulama</title>
+    <script src="https://www.google.com/recaptcha/enterprise.js?render=6LcaULwsAAAAAH3iIhhndpyA_cJ72bOi-fAUGrE0"></script>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --accent-color: #58a6ff;
+            --text-color: #c9d1d9;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            text-align: center;
+            width: 90%;
+            max-width: 450px;
+            border: 1px solid #30363d;
+        }
+
+        .ip-display {
+            background: #0d1117;
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid var(--accent-color);
+            margin-bottom: 20px;
+        }
+
+        #ip-address {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--accent-color);
+            font-family: 'Consolas', monospace;
+            margin: 0;
+        }
+
+        .details {
+            text-align: left;
+            background: #21262d;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        .details-item {
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        button {
+            background: var(--accent-color);
+            color: #fff;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100%;
+        }
+
+        button:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+        }
+
+        footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #8b949e;
+        }
+    </style>
+
+
+
+
+
+
+
+
+
+
+</head>
+<body>
+
+<div class="container">
+    <h1>Cihaz Bilgileriniz</h1>
+    
+    <div class="ip-display">
+        <p id="ip-address">Yükleniyor...</p>
+    </div>
+
+    <div class="details">
+        <div class="details-item"><span>İşletim Sistemi:</span><span id="os-info">-</span></div>
+        <div class="details-item"><span>Tarayıcı:</span><span id="browser-info">-</span></div>
+        <div class="details-item"><span>Dil:</span><span id="lang-info">-</span></div>
+    </div>
+
+    <button id="copy-btn">IP ADRESİNİ KOPYALA</button>
+
+    <footer>
+        &copy; 2026 IP Sorgulama Aracı | Güvenli ve Hızlı
+    </footer>
+</div>
+
+<script>
+    // 1. IP ve Cihaz Bilgilerini Getir
+    async function init() {
+        try {
+            const response = await fetch('https://api.ipify.org?format=json');
+            const data = await response.json();
+            document.getElementById('ip-address').innerText = data.ip;
+        } catch {
+            document.getElementById('ip-address').innerText = "Hata!";
+        }
+
+        const ua = navigator.userAgent;
+        let os = "Bilinmiyor";
+        if (ua.indexOf("Win") != -1) os = "Windows";
+        else if (ua.indexOf("Mac") != -1) os = "MacOS";
+        else if (ua.indexOf("Android") != -1) os = "Android";
+        else if (ua.indexOf("Linux") != -1) os = "Linux";
+
+        document.getElementById('os-info').innerText = os;
+        document.getElementById('browser-info').innerText = navigator.appName;
+        document.getElementById('lang-info').innerText = navigator.language.toUpperCase();
+    }
+
+    // 2. Kopyalama ve reCAPTCHA Tetikleme
+    document.getElementById('copy-btn').addEventListener('click', async function(e) {
+        const ip = document.getElementById('ip-address').innerText;
+        if(ip === "Yükleniyor..." || ip === "Hata!") return;
+
+        // Google reCAPTCHA Güvenlik Kontrolü (Enterprise)
+        grecaptcha.enterprise.ready(async () => {
+            await grecaptcha.enterprise.execute('6LcaULwsAAAAAH3iIhhndpyA_cJ72bOi-fAUGrE0', {action: 'COPY_IP'});
+            console.log("Güvenlik kontrolü yapıldı.");
+        });
+
+        // Kopyalama işlemi
+        navigator.clipboard.writeText(ip).then(() => {
+            const btn = document.getElementById('copy-btn');
+            const originalText = btn.innerText;
+            btn.innerText = "KOPYALANDI!";
+            btn.style.background = "#3fb950";
+            
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.style.background = "#58a6ff";
+            }, 2000);
+        });
+    });
+
+    init();
+</script>
+
+</body>
+</html>
